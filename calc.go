@@ -3,6 +3,7 @@ package mpxr
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
 type NamedConc struct {
@@ -107,14 +108,14 @@ func FullCalcFixedConc(totalVol, totalConc float64, concs ...NamedConc) []NamedC
 
 func FprintVolsLatex(w io.Writer, header bool, digits int, vols ...NamedConcVol) (n int, err error) {
 	if header {
-		nw, e := fmt.Fprintf(w, "name & conc & vol & mass\n")
+		nw, e := fmt.Fprintf(w, "name & conc & vol & mass\\\\\n")
 		n += nw
 		if e != nil {
 			return n, e
 		}
 	}
 	for _, vol := range vols {
-		nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\n", vol.Name, digits, vol.Conc, digits, vol.Vol, digits, vol.Conc * vol.Vol)
+		nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\\\\\n", strings.ReplaceAll(vol.Name, "_", "\\_"), digits, vol.Conc, digits, vol.Vol, digits, vol.Conc * vol.Vol)
 		n += nw
 		if e != nil {
 			return n, e
@@ -122,7 +123,7 @@ func FprintVolsLatex(w io.Writer, header bool, digits int, vols ...NamedConcVol)
 	}
 
 	total := Total(vols...)
-	nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\n", total.Name, digits, total.Conc, digits, total.Vol, digits, total.Conc * total.Vol)
+	nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\n\\\\", strings.ReplaceAll(total.Name, "_", "\\_"), digits, total.Conc, digits, total.Vol, digits, total.Conc * total.Vol)
 	n += nw
 	return n, e
 }
