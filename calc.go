@@ -123,7 +123,7 @@ func FprintVolsLatex(w io.Writer, header bool, digits int, vols ...NamedConcVol)
 	}
 
 	total := Total(vols...)
-	nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\n\\\\", strings.ReplaceAll(total.Name, "_", "\\_"), digits, total.Conc, digits, total.Vol, digits, total.Conc * total.Vol)
+	nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\\\\\n", strings.ReplaceAll(total.Name, "_", "\\_"), digits, total.Conc, digits, total.Vol, digits, total.Conc * total.Vol)
 	n += nw
 	return n, e
 }
