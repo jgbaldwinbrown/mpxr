@@ -104,3 +104,26 @@ func FullCalcFixedConc(totalVol, totalConc float64, concs ...NamedConc) []NamedC
 	vols = append(vols, NamedConcVol{Name: "water", Conc: 0.0, Vol: totalVol - volsum})
 	return vols
 }
+
+func FprintVolsLatex(w io.Writer, header bool, digits int, vols ...NamedConcVol) (n int, err error) {
+	if header {
+		nw, e := fmt.Fprintf(w, "name & conc & vol & mass\n")
+		n += nw
+		if e != nil {
+			return n, e
+		}
+	}
+	for _, vol := range vols {
+		nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\n", vol.Name, digits, vol.Conc, digits, vol.Vol, digits, vol.Conc * vol.Vol)
+		n += nw
+		if e != nil {
+			return n, e
+		}
+	}
+
+	total := Total(vols...)
+	nw, e := fmt.Fprintf(w, "%v & %.*f & %.*f & %.*f\n", total.Name, digits, total.Conc, digits, total.Vol, digits, total.Conc * total.Vol)
+	n += nw
+	return n, e
+}
+
