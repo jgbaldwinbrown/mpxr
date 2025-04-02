@@ -16,10 +16,6 @@ type NamedConcVol struct {
 	Vol float64
 }
 
-// finalConc := ((v1 * c1) + (v2 * c2) + (v3 * c3) + (v4 * c4)) / totalVol
-// fmt.Printf("finalConc: %v\n", finalConc)
-
-
 func Total(vols ...NamedConcVol) NamedConcVol {
 	var t NamedConcVol
 	t.Name = "total"
@@ -31,6 +27,22 @@ func Total(vols ...NamedConcVol) NamedConcVol {
 	return t
 }
 
+// This uses the following system of equations to calculate the volumes to add
+// to produce a final volume with equal masses from all of the inputs (assuming 3 inputs here as an example):
+//
+// c1 * v1 = c2 * v2
+// c1 * v1 = c3 * v3
+// v1 + v2 + v3 = total
+//
+// solve the first 2 for v2 and v3, then substitute:
+// v2 = (v1 * c1) / c2
+// v3 = (v1 * c1) / c3
+// v1 + ((v1 * c1) / c2) + ((v1 * c1) / c3) = total
+//
+// solve for v1:
+// v1 * (1 + (c1 / c2) + (c1 / c3)) = total
+// v1 * (1 + (c1 * (1 / c2 + 1 / c3))) = total
+// v1 = total / (1 + (c1 * (1 / c2 + 1 / c3)))
 func FullCalc(totalVol float64, concs ...NamedConc) []NamedConcVol {
 	if len(concs) < 1 {
 		return nil
@@ -73,4 +85,22 @@ func FprintVols(w io.Writer, header bool, vols ...NamedConcVol) (n int, err erro
 	nw, e := fmt.Fprintf(w, "%v\t%v\t%v\t%v\n", total.Name, total.Conc, total.Vol, total.Conc * total.Vol)
 	n += nw
 	return n, e
+}
+
+// this solves the following system of equations, assuming 3 inputs:
+// v1 * c1 = v2 * c2
+// v1 * c1 = v3 * c3
+// ((v1 * c1) + (v2 * c2) + (v3 * c3)
+// ...
+
+func FullCalcFixedConc(totalVol, totalConc float64, concs ...NamedConc) []NamedConcVol {
+	vols := make([]NamedConcVol, 0, len(concs))
+	volsum := 0.0
+	for _, c := range concs {
+		vol := totalConc * totalVol / (float64(len(concs)) * c.Conc)
+		volsum += vol
+		vols = append(vols, NamedConcVol{Name: c.Name, Conc: c.Conc, Vol: vol})
+	}
+	vols = append(vols, NamedConcVol{Name: "water", Conc: 0.0, Vol: totalVol - volsum})
+	return vols
 }

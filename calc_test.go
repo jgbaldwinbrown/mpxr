@@ -33,3 +33,17 @@ func TestFullCalc(t *testing.T) {
 		t.Errorf("tot1 %v != tot2.Conc %v", tot1, tot2.Conc)
 	}
 }
+
+func TestFullFixedCalc(t *testing.T) {
+	cs := []NamedConc {
+		NamedConc{Name: "a", Conc: 3.5},
+		NamedConc{Name: "b", Conc: 2.2},
+		NamedConc{Name: "c", Conc: 4.0},
+		NamedConc{Name: "d", Conc: 9.0},
+	}
+	tot1 := FullCalc4(cs[0].Conc, cs[1].Conc, cs[2].Conc, cs[3].Conc, 12.0)
+	tot2 := Total(FullCalcFixedConc(12.0, tot1, cs...)...)
+	if tot1 != tot2.Conc {
+		t.Errorf("tot1 %v != tot2.Conc %v", tot1, tot2.Conc)
+	}
+}
